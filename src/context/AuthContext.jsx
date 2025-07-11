@@ -1,37 +1,38 @@
+// src/context/AuthContext.jsx
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-// Buat AuthContext
 const AuthContext = createContext();
 
-// Provider-nya
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null); // Menyimpan user login
-  const [loading, setLoading] = useState(true); // Bisa dipakai untuk splash screen
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Simulasi: ambil user dari localStorage
-  // Di src/context/AuthContext.jsx
+  useEffect(() => {
+    const storedUser = localStorage.getItem('jendelacilik_user'); // ✅ benar
+    const storedToken = localStorage.getItem('token');
 
-useEffect(() => {
-  // KEMBALIKAN KODE INI SEPERTI SEMULA
-  const storedUser = localStorage.getItem('user');
-  const storedToken = localStorage.getItem('token');
-  if (storedUser && storedToken) {
-    setUser(JSON.parse(storedUser));
-    setToken(storedToken);
-  }
-  setLoading(false);
-}, []);
+    if (storedUser && storedToken) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (err) {
+        console.error("Gagal parsing user dari localStorage:", err);
+        localStorage.removeItem('jendelacilik_user');
+      }
+    }
 
-  // Fungsi login
-  const login = (userData) => {
+    setLoading(false);
+  }, []);
+
+  const login = (userData, token) => {
     setUser(userData);
     localStorage.setItem('jendelacilik_user', JSON.stringify(userData));
+    localStorage.setItem('token', token); // ✅ WAJIB
   };
 
-  // Fungsi logout
   const logout = () => {
     setUser(null);
     localStorage.removeItem('jendelacilik_user');
+    localStorage.removeItem('token');
   };
 
   return (
@@ -41,5 +42,4 @@ useEffect(() => {
   );
 };
 
-// Hook biar gampang pakai
 export const useAuth = () => useContext(AuthContext);

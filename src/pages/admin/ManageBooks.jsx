@@ -1,5 +1,3 @@
-// src/pages/admin/ManageBooks.jsx
-
 import { useState, useEffect } from "react";
 import axios from "axios";
 import {
@@ -8,30 +6,29 @@ import {
   Button,
   Select,
   Typography,
-  Upload,
-  message,
+  Row,
+  Col,
+  Card,
   Modal,
-  Table,
-  Space,
+  message,
+  Tooltip,
 } from "antd";
 import {
   EditOutlined,
   DeleteOutlined,
-  FilePdfOutlined,
-  UploadOutlined,
   PlusOutlined,
 } from "@ant-design/icons";
-import '../../styles/managebooks.css';
+import "../../styles/managebooks.css";
 
-const { Title } = Typography;
+const { Title, Paragraph } = Typography;
 const { Option } = Select;
 
 export default function ManageBooks() {
   const [form] = Form.useForm();
   const [books, setBooks] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [editingId, setEditingId] = useState(null);
-  const [previewImage, setPreviewImage] = useState(null);
+  const [previewBook, setPreviewBook] = useState(null);
 
   const fetchBooks = async () => {
     setLoading(true);
@@ -50,44 +47,27 @@ export default function ManageBooks() {
   }, []);
 
   const handleSubmit = async (values) => {
-    if (!values.pdf && !editingId) {
-      return message.error("File PDF wajib diupload!");
-    }
-    if (!values.cover && !editingId) {
-      return message.error("Thumbnail wajib diupload!");
-    }
-
-    const formData = new FormData();
-    formData.append('title', values.title);
-    formData.append('genre', values.genre);
-    formData.append('description', values.description);
-
-    if (values.cover && values.cover.length > 0) {
-      formData.append('cover', values.cover[0].originFileObj);
-    }
-    if (values.pdf && values.pdf.length > 0) {
-      formData.append('pdf', values.pdf[0].originFileObj);
-    }
+    const data = {
+      title: values.title,
+      coverUrl: values.coverUrl,
+      genre: values.genre,
+      description: values.description,
+    };
 
     setLoading(true);
     try {
       if (editingId) {
-        await axios.put(`http://localhost:8000/api/books/${editingId}`, formData, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        });
-        message.success("Buku berhasil diperbarui!");
+        await axios.put(`http://localhost:8000/api/books/${editingId}`, data);
+        message.success("Buku berhasil diperbarui.");
       } else {
-        await axios.post("http://localhost:8000/api/books", formData, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        });
-        message.success("Buku berhasil ditambahkan!");
+        await axios.post("http://localhost:8000/api/books", data);
+        message.success("Buku berhasil ditambahkan.");
       }
       form.resetFields();
       setEditingId(null);
       await fetchBooks();
     } catch (error) {
       message.error("Gagal menyimpan buku.");
-      console.error("Submit error:", error);
     } finally {
       setLoading(false);
     }
@@ -97,6 +77,7 @@ export default function ManageBooks() {
     setEditingId(book._id);
     form.setFieldsValue({
       title: book.title,
+      coverUrl: book.coverUrl,
       genre: book.genre,
       description: book.description,
     });
@@ -107,14 +88,15 @@ export default function ManageBooks() {
       title: "Yakin ingin menghapus buku ini?",
       okText: "Ya, Hapus",
       okType: "danger",
+      cancelText: "Batal",
       onOk: async () => {
         setLoading(true);
         try {
           await axios.delete(`http://localhost:8000/api/books/${id}`);
-          message.success("Buku berhasil dihapus");
+          message.success("Buku berhasil dihapus.");
           await fetchBooks();
         } catch (error) {
-          message.error("Gagal menghapus buku");
+          message.error("Gagal menghapus buku.");
         } finally {
           setLoading(false);
         }
@@ -122,7 +104,8 @@ export default function ManageBooks() {
     });
   };
 
-  const handlePreview = (url) => setPreviewImage(url);
+  const handlePreview = (book) => setPreviewBook(book);
+  const handleCancelPreview = () => setPreviewBook(null);
 
   return (
     <div className="manage-books-container">
@@ -139,37 +122,20 @@ export default function ManageBooks() {
           <Input placeholder="Judul Buku" />
         </Form.Item>
 
-        <Form.Item
-          label="Upload File Buku (PDF)"
-          name="pdf"
-          valuePropName="fileList"
-          getValueFromEvent={(e) => (Array.isArray(e) ? e : e?.fileList)}
-          rules={[{ required: !editingId, message: "File PDF wajib diupload" }]}
-        >
-          <Upload beforeUpload={() => false} maxCount={1} listType="text">
-            <Button icon={<UploadOutlined />}>Upload PDF</Button>
-          </Upload>
-        </Form.Item>
+        {/* PDF LINK REMOVED */}
 
         <Form.Item
-          label="Upload Gambar Sampul"
-          name="cover"
-          valuePropName="fileList"
-          getValueFromEvent={(e) => (Array.isArray(e) ? e : e?.fileList)}
-          rules={[{ required: !editingId, message: "Sampul wajib diupload" }]}
+          label="Thumbnail URL"
+          name="coverUrl"
+          rules={[
+            { required: true, message: "URL thumbnail wajib diisi" },
+            {
+              pattern: /^https?:\/\/.+\.(jpg|jpeg|png|webp)$/i,
+              message: "Masukkan URL gambar yang valid (jpg/png/webp)",
+            },
+          ]}
         >
-          <Upload
-            beforeUpload={() => false}
-            listType="picture-card"
-            accept="image/*"
-            maxCount={1}
-            onPreview={(file) => handlePreview(file.thumbUrl || file.url || "")}
-          >
-            <div>
-              <PlusOutlined />
-              <div style={{ marginTop: 8 }}>Upload</div>
-            </div>
-          </Upload>
+          <Input placeholder="https://example.com/cover.jpg" />
         </Form.Item>
 
         <Form.Item
@@ -186,8 +152,8 @@ export default function ManageBooks() {
           </Select>
         </Form.Item>
 
-        <Form.Item label="Deskripsi" name="description">
-          <Input.TextArea rows={3} placeholder="Deskripsi singkat buku" />
+        <Form.Item label="Deskripsi (Link Cerita)" name="description">
+          <Input.TextArea rows={3} placeholder="https://drive.google.com/..." />
         </Form.Item>
 
         <Form.Item>
@@ -201,11 +167,11 @@ export default function ManageBooks() {
           </Button>
           {editingId && (
             <Button
-              style={{ marginLeft: 8 }}
               onClick={() => {
                 form.resetFields();
                 setEditingId(null);
               }}
+              style={{ marginLeft: 8 }}
             >
               Batal
             </Button>
@@ -215,59 +181,87 @@ export default function ManageBooks() {
 
       <Title level={4}>📖 Daftar Buku</Title>
 
-      <Table
-        loading={loading}
-        columns={[
-          {
-            title: 'Sampul',
-            dataIndex: 'coverUrl',
-            render: (url) => (
-              <img
-                src={`http://localhost:8000/${url}`}
-                alt="sampul"
-                style={{ width: 60, height: 80, objectFit: 'cover', borderRadius: 4 }}
-              />
-            ),
-          },
-          { title: 'Judul', dataIndex: 'title' },
-          { title: 'Genre', dataIndex: 'genre' },
-          {
-            title: 'Aksi',
-            key: 'action',
-            render: (_, record) => (
-              <Space>
-                <Button icon={<EditOutlined />} onClick={() => handleEdit(record)}>
-                  Edit
-                </Button>
-                <Button
-                  danger
-                  icon={<DeleteOutlined />}
-                  onClick={() => handleDelete(record._id)}
-                >
-                  Hapus
-                </Button>
-                <Button
-                  type="link"
-                  icon={<FilePdfOutlined />}
-                  href={`http://localhost:8000${record.pdfUrl}`}
-                  target="_blank"
-                >
-                  Buka PDF
-                </Button>
-              </Space>
-            ),
-          },
-        ]}
-        dataSource={books}
-        rowKey="_id"
-      />
+      <Row gutter={[16, 16]}>
+        {loading ? (
+          <p>Loading...</p>
+        ) : books.length === 0 ? (
+          <p>Belum ada buku ditambahkan.</p>
+        ) : (
+          books.map((book) => (
+            <Col key={book._id} xs={24} sm={12} md={8} lg={6}>
+              <Card
+                hoverable
+                cover={
+                  <img
+                    alt={book.title}
+                    src={book.coverUrl}
+                    onClick={() => handlePreview(book)}
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = "https://placehold.co/200x300?text=No+Image";
+                    }}
+                    style={{ height: 300, objectFit: "cover", cursor: "pointer" }}
+                  />
+                }
+                actions={[
+                  <Tooltip title="Edit Buku">
+                    <EditOutlined onClick={() => handleEdit(book)} />
+                  </Tooltip>,
+                  <Tooltip title="Hapus Buku">
+                    <DeleteOutlined
+                      onClick={() => handleDelete(book._id)}
+                      style={{ color: "red" }}
+                    />
+                  </Tooltip>,
+                ]}
+              >
+                <Card.Meta
+                  title={book.title}
+                  description={
+                    <>
+                      <p>📚 Genre: {book.genre}</p>
+                      <p>{book.description}</p>
+                    </>
+                  }
+                />
+              </Card>
+            </Col>
+          ))
+        )}
+      </Row>
 
       <Modal
-        open={!!previewImage}
+        open={!!previewBook}
         footer={null}
-        onCancel={() => setPreviewImage(null)}
+        onCancel={handleCancelPreview}
+        title={previewBook?.title}
       >
-        <img alt="Preview Sampul" src={previewImage} style={{ width: "100%" }} />
+        {previewBook && (
+          <>
+            <img
+              alt="Preview Cover"
+              src={previewBook.coverUrl}
+              style={{ width: "100%", borderRadius: 8, marginBottom: 16 }}
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = "https://placehold.co/200x300?text=No+Image";
+              }}
+            />
+            <Paragraph>
+              <strong>📚 Genre:</strong> {previewBook.genre}
+            </Paragraph>
+            <Paragraph copyable>
+              <strong>🔗 Link Cerita:</strong>{" "}
+              <a
+                href={previewBook.description}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {previewBook.description}
+              </a>
+            </Paragraph>
+          </>
+        )}
       </Modal>
     </div>
   );

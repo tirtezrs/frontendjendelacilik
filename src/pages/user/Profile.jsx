@@ -1,68 +1,94 @@
-import React, { useState, useEffect } from 'react'; // <-- Tambahkan useEffect
+import React, { useState, useEffect } from 'react';
 import {
   Typography,
   Card,
   Form,
   Input,
-  Upload,
   Button,
   Radio,
   message,
   Divider,
   Modal,
-  Avatar, // <-- Tambahkan Avatar
 } from "antd";
-import { UploadOutlined, LogoutOutlined, UserOutlined } from "@ant-design/icons";
+import { LogoutOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from '../../context/AuthContext'; // <-- Import useAuth
+import { useAuth } from '../../context/AuthContext';
 
-const { Title, Text } = Typography;
+const { Title } = Typography;
 
 const Profile = () => {
   const [form] = Form.useForm();
   const [passwordForm] = Form.useForm();
-  
-  const { user, logout } = useAuth(); // <-- Ambil data user dan fungsi logout dari context
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
-  
-  // State untuk avatar tetap sama, tapi nilai defaultnya bisa kita ambil dari user
-  const [avatarUrl, setAvatarUrl] = useState(user?.avatar || "/avatar-default.png");
-  const [fileName, setFileName] = useState("");
 
-  // --- BARU: Mengisi form dengan data user saat komponen dimuat ---
   useEffect(() => {
     if (user) {
       form.setFieldsValue({
         username: user.username,
         email: user.email,
-        // Anda bisa tambahkan field lain seperti gender jika ada di data user
+        gender: user.gender || null,
       });
     }
   }, [user, form]);
 
+  const handleSubmitProfile = async (values) => {
+    try {
+      const response = await fetch(`http://localhost:8000/api/profile/${user.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: values.username,
+          email: values.email,
+          gender: values.gender || "",
+        }),
+      });
 
-  const handleAvatarChange = (info) => {
-    // Logika avatar change Anda sudah bagus, bisa dipertahankan
-    // ...
-  };
-
-  const handleSubmitProfile = (values) => {
-    // Di sini nanti kita akan panggil API untuk update profil
-    console.log("Data profil baru:", values);
-    message.success("Profil berhasil diperbarui! (Fungsi API belum terhubung)");
-  };
-
-  const handleSubmitPassword = (values) => {
-    // Di sini nanti kita akan panggil API untuk ubah password
-    if (values.newPassword !== values.confirmPassword) {
-      return message.error("Konfirmasi password tidak sama!");
+      const data = await response.json();
+      if (response.ok) {
+        message.success("Profil berhasil diperbarui!");
+      } else {
+        message.error(data.message || "Gagal memperbarui profil");
+      }
+    } catch (err) {
+      console.error(err);
+      message.error("Terjadi kesalahan saat memperbarui profil");
     }
-    console.log("Password baru:", values.newPassword);
-    message.success("Password berhasil diperbarui! (Fungsi API belum terhubung)");
-    passwordForm.resetFields();
   };
 
-  // --- DIUBAH: Fungsi logout sekarang memanggil dari context ---
+  const handleSubmitPassword = async (values) => {
+    if (values.newPassword !== values.confirmPassword) {
+      return message.error("Password baru dan konfirmasi tidak cocok!");
+    }
+
+    try {
+      const response = await fetch(`http://localhost:8000/api/profile/${user.id}/password`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          oldPassword: values.oldPassword,
+          newPassword: values.newPassword,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        message.success("Password berhasil diperbarui!");
+        passwordForm.resetFields();
+      } else {
+        message.error(data.message || "Gagal mengubah password.");
+      }
+    } catch (err) {
+      console.error("Update password error:", err);
+      message.error("Terjadi kesalahan saat mengubah password.");
+    }
+  };
+
   const showLogoutConfirm = () => {
     Modal.confirm({
       title: "Konfirmasi Logout",
@@ -70,8 +96,8 @@ const Profile = () => {
       okText: "Ya, Logout",
       cancelText: "Batal",
       onOk() {
-        logout(); // Panggil fungsi logout dari AuthContext
-        // Navigasi sudah di-handle di dalam fungsi logout di context
+        logout();
+        navigate("/login");
       },
     });
   };
@@ -80,41 +106,29 @@ const Profile = () => {
     <div style={{ padding: 24, minHeight: "100vh" }}>
       <Title level={2}>👤 Profil Saya</Title>
 
-      <Card>
-        <Form
-          layout="vertical"
-          form={form}
-          onFinish={handleSubmitProfile}
-        >
-          <Form.Item label="Foto Profil">
-            {/* Menggunakan komponen Avatar dari AntD agar lebih bagus */}
-            <Avatar 
-                src={avatarUrl} 
-                size={100} 
-                icon={<UserOutlined />}
-                style={{ marginBottom: 12, border: '2px solid #ccc' }}
-            />
-            <Upload
-              showUploadList={false}
-              beforeUpload={() => false}
-              onChange={handleAvatarChange}
-              accept="image/png,image/jpeg"
-            >
-              <Button icon={<UploadOutlined />}>Ubah Foto</Button>
-            </Upload>
-            {fileName && (
-              <Text type="secondary" style={{ display: "block", marginTop: 8 }}>
-                File terpilih: {fileName}
-              </Text>
-            )}
+      {/* FORM PROFIL */}
+      <Card
+        hoverable={false}
+        style={{ boxShadow: 'none', transition: 'none' }}
+      >
+        <Form layout="vertical" form={form} onFinish={handleSubmitProfile}>
+          <Form.Item
+            label="Username"
+            name="username"
+            rules={[{ required: true, message: "Username wajib diisi" }]}
+          >
+            <Input />
           </Form.Item>
 
-          <Form.Item label="Username" name="username" rules={[{ required: true, message: "Masukkan username" }]}>
-            <Input readOnly /> {/* Username biasanya tidak bisa diubah */}
-          </Form.Item>
-
-          <Form.Item label="Email" name="email" rules={[{ required: true, message: "Masukkan email" }, { type: "email" }]}>
-            <Input readOnly /> {/* Email biasanya tidak bisa diubah */}
+          <Form.Item
+            label="Email"
+            name="email"
+            rules={[
+              { required: true, message: "Email wajib diisi" },
+              { type: "email", message: "Format email tidak valid" },
+            ]}
+          >
+            <Input />
           </Form.Item>
 
           <Form.Item label="Jenis Kelamin" name="gender">
@@ -135,13 +149,46 @@ const Profile = () => {
 
       <Divider />
 
-      <Card title="🔒 Ubah Password">
+      {/* FORM GANTI PASSWORD */}
+      <Card
+        title="🔒 Ubah Password"
+        hoverable={false}
+        style={{ boxShadow: 'none', transition: 'none' }}
+      >
         <Form layout="vertical" form={passwordForm} onFinish={handleSubmitPassword}>
-            {/* ... Isi form ubah password Anda tetap sama ... */}
+          <Form.Item
+            label="Password Lama"
+            name="oldPassword"
+            rules={[{ required: true, message: "Masukkan password lama" }]}
+          >
+            <Input.Password />
+          </Form.Item>
+
+          <Form.Item
+            label="Password Baru"
+            name="newPassword"
+            rules={[{ required: true, message: "Masukkan password baru" }]}
+          >
+            <Input.Password />
+          </Form.Item>
+
+          <Form.Item
+            label="Konfirmasi Password Baru"
+            name="confirmPassword"
+            rules={[{ required: true, message: "Konfirmasi password baru" }]}
+          >
+            <Input.Password />
+          </Form.Item>
+
+          <Form.Item>
+            <Button type="primary" htmlType="submit">
+              Ubah Password
+            </Button>
+          </Form.Item>
         </Form>
       </Card>
 
-      {/* Tombol Logout */}
+      {/* LOGOUT */}
       <div style={{ textAlign: "center", marginTop: 32 }}>
         <Button
           type="primary"

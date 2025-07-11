@@ -1,86 +1,54 @@
 // src/pages/admin/ProfileAdmin.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Typography,
   Card,
   Form,
   Input,
-  Upload,
   Button,
   Radio,
   message,
-  Avatar,
 } from "antd";
-import { UploadOutlined, UserOutlined } from "@ant-design/icons";
+import { useAuth } from "../../context/AuthContext";
 
 const { Title } = Typography;
 
 const ProfileAdmin = () => {
   const [form] = Form.useForm();
-  const [avatarUrl, setAvatarUrl] = useState(null); // default null, pakai Avatar fallback
+  const { user } = useAuth(); // Ambil data admin
 
-  const handleAvatarChange = (info) => {
-    const file = info.file.originFileObj;
-
-    if (!file) return;
-
-    if (file.size > 10 * 1024 * 1024) {
-      message.error("Ukuran file maksimal 10MB!");
-      return;
+  useEffect(() => {
+    if (user) {
+      form.setFieldsValue({
+        username: user.username,
+        email: user.email,
+        gender: user.gender || null,
+      });
     }
+  }, [user, form]);
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      setAvatarUrl(e.target.result); // preview base64
-    };
-    reader.readAsDataURL(file);
-  };
+  const handleSubmit = async (values) => {
+    try {
+      const formData = new FormData();
+      formData.append("gender", values.gender || "");
 
-  const handleSubmit = (values) => {
-    console.log("Profil disimpan:", {
-      ...values,
-      avatar: avatarUrl,
-    });
-    message.success("Profil berhasil diperbarui!");
-    // Kirim ke backend jika sudah siap
+      await fetch(`http://localhost:8000/api/profile/${user.id}`, {
+        method: "PUT",
+        body: formData,
+      });
+
+      message.success("Profil berhasil diperbarui!");
+    } catch (error) {
+      console.error(error);
+      message.error("Gagal memperbarui profil");
+    }
   };
 
   return (
     <div style={{ padding: 24 }}>
       <Title level={2}>👤 Edit Profil Admin</Title>
-      <Card>
-        <Form
-          layout="vertical"
-          form={form}
-          initialValues={{
-            username: "admin",
-            email: "admin@jendelacilik.com",
-            gender: "Laki-laki",
-          }}
-          onFinish={handleSubmit}
-        >
-          <Form.Item label="Foto Profil">
-            <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-              <Upload
-                showUploadList={false}
-                beforeUpload={() => false}
-                onChange={handleAvatarChange}
-                accept="image/*"
-              >
-                <Button icon={<UploadOutlined />}>Pilih Foto</Button>
-              </Upload>
-              <Avatar
-                size={80}
-                src={avatarUrl}
-                icon={!avatarUrl && <UserOutlined />}
-                style={{
-                  border: "2px solid #ccc",
-                  backgroundColor: "#eee",
-                }}
-              />
-            </div>
-          </Form.Item>
-
+      <Card hoverable={false} style={{ boxShadow: 'none', transition: 'none' }}>
+        <Form layout="vertical" form={form} onFinish={handleSubmit}>
           <Form.Item
             label="Username"
             name="username"

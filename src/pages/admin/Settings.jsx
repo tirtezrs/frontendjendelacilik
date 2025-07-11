@@ -1,5 +1,4 @@
 // src/pages/admin/Settings.jsx
-
 import React, { useState } from "react";
 import {
   Typography,
@@ -11,6 +10,7 @@ import {
   message,
 } from "antd";
 import axios from "axios";
+import { useAuth } from "../../context/AuthContext";
 import "../../styles/managesettings.css";
 
 const { Title, Text } = Typography;
@@ -18,6 +18,7 @@ const { Title, Text } = Typography;
 const Settings = () => {
   const [passwordForm] = Form.useForm();
   const [loading, setLoading] = useState(false);
+  const { user } = useAuth(); // Ambil user login (admin)
 
   const handlePasswordChange = async (values) => {
     if (values.newPassword !== values.confirmPassword) {
@@ -26,11 +27,13 @@ const Settings = () => {
 
     setLoading(true);
     try {
-      // Kirim request ke backend
-      const response = await axios.put("http://localhost:8000/api/admins/update-password", {
-        oldPassword: values.oldPassword,
-        newPassword: values.newPassword,
-      });
+      const response = await axios.put(
+        `http://localhost:8000/api/profile/${user.id}/password`, // ← endpoint password user/admin
+        {
+          oldPassword: values.oldPassword,
+          newPassword: values.newPassword,
+        }
+      );
 
       if (response.data.success) {
         message.success("Password berhasil diperbarui!");
@@ -41,7 +44,8 @@ const Settings = () => {
     } catch (error) {
       console.error("Update password error:", error);
       message.error(
-        error.response?.data?.message || "Terjadi kesalahan saat mengubah password."
+        error.response?.data?.message ||
+          "Terjadi kesalahan saat mengubah password."
       );
     } finally {
       setLoading(false);
@@ -50,9 +54,9 @@ const Settings = () => {
 
   return (
     <div className="manage-settings-container">
-      <Title level={2}>⚙️ Pengaturan Admin</Title>
+      <Title level={2}>⚙ Pengaturan Admin</Title>
 
-      <Card>
+      <Card hoverable={false} style={{ boxShadow: "none", transition: "none" }}>
         <Title level={4}>🔐 Ganti Password</Title>
         <Form layout="vertical" form={passwordForm} onFinish={handlePasswordChange}>
           <Form.Item
