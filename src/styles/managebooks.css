@@ -1,0 +1,87 @@
+.manage-books-container {
+  padding: 32px;
+  min-height: 100vh;
+  background-image: url("/images/backgoundall.jpg"); /* pastikan file ada di folder public */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
+  font-family: 'Comic Sans MS', cursive, sans-serif;
+}
+
+/* Overlay transparan putih */
+.manage-books-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: rgba(255, 255, 255, 0.7);
+  z-index: 0;
+}
+
+.manage-books-container > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Form container */
+.ant-form {
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Judul Halaman */
+.ant-typography {
+  color: #2b2b2b;
+}
+
+/* Upload thumbnail & PDF */
+.ant-upload-picture-card-wrapper,
+.ant-upload-list {
+  border-radius: 8px;
+}
+
+/* Card Buku */
+.ant-card {
+  background-color: #ffffffd9;
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.ant-card:hover {
+  transform: scale(1.02);
+}
+
+/* Gambar Sampul */
+.ant-card-cover img {
+  height: 240px;
+  object-fit: cover;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+}
+
+/* Isi Card */
+.ant-card-meta-description p {
+  margin-bottom: 6px;
+  font-size: 14px;
+  color: #444;
+}
+
+/* Tombol Primary */
+.ant-btn-primary {
+  background-color: #1890ff;
+  border-color: #1890ff;
+}
+
+.ant-btn-primary:hover {
+  background-color: #1677d4;
+  border-color: #1677d4;
+}
+
+/* Modal Preview Gambar */
+.ant-modal-content {
+  border-radius: 12px;
+  overflow: hidden;
+}

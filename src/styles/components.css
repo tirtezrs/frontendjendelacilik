@@ -1,0 +1,29 @@
+.btn-primary {
+  background-image: var(--color-primary);
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(119, 182, 234, 0.2);
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  opacity: 0.95;
+  transform: translateY(-2px);
+}
+
+.card-candy {
+  background-color: var(--color-card);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  transition: 0.2s ease-in-out;
+}
+
+.card-candy:hover {
+  background-color: var(--color-accent);
+  transform: translateY(-3px);
+}

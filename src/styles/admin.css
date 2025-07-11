@@ -1,0 +1,38 @@
+.admin-container {
+  padding: 32px;
+  background-color: var(--color-background);
+}
+
+.admin-title {
+  font-size: 24px;
+  margin-bottom: 24px;
+  font-weight: bold;
+  background: var(--color-primary);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  text-align: center;
+}
+
+.admin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.admin-card {
+  background-color: var(--color-card);
+  padding: 20px;
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.admin-card h4 {
+  margin: 0 0 8px 0;
+  color: var(--color-text);
+}
+
+.admin-card p {
+  color: #555;
+}

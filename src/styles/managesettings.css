@@ -1,0 +1,70 @@
+/* Container Utama */
+.manage-settings-container {
+  padding: 32px;
+  background-image: url("/images/backgoundall.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  min-height: 100vh;
+  font-family: 'Comic Sans MS', cursive, sans-serif;
+  position: relative;
+}
+
+/* Overlay */
+.manage-settings-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: rgba(255, 255, 255, 0.7);
+  z-index: 0;
+}
+
+.manage-settings-container > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Judul */
+.manage-settings-container h2,
+.manage-settings-container h4 {
+  color: #2b2b2b;
+}
+
+/* Card */
+.manage-settings-container .ant-card {
+  border-radius: 12px;
+  background-color: #ffffffd9;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin-bottom: 24px;
+}
+
+/* Form */
+.manage-settings-container .ant-form {
+  padding-top: 8px;
+}
+
+/* Input Password */
+.manage-settings-container .ant-input-password {
+  border-radius: 8px;
+}
+
+/* Tombol Simpan */
+.manage-settings-container .ant-btn-primary {
+  background-color: #1677d4;
+  border-color: #1677d4;
+  border-radius: 8px;
+}
+
+.manage-settings-container .ant-btn-primary:hover {
+  background-color: #1677d4;
+  border-color: #1677d4;
+}
+
+/* Switch */
+.manage-settings-container .ant-switch {
+  background-color: #ffd54f;
+}
+
+.manage-settings-container .ant-switch-checked {
+  background-color: #4caf50;
+}

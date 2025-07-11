@@ -1,0 +1,96 @@
+.dashboard-container {
+  padding: 32px;
+  min-height: 100vh;
+  background-image: url("/images/backgoundall.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  font-family: 'Comic Sans MS', cursive, sans-serif;
+  position: relative;
+}
+
+/* Tambahan overlay putih lembut agar konten tetap terlihat */
+.dashboard-container::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(255, 255, 255, 0.6);
+  z-index: 0;
+}
+
+.dashboard-header,
+.dashboard-stats,
+.quick-actions {
+  position: relative; /* agar tidak tertutup overlay */
+  z-index: 1;
+}
+
+.dashboard-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.dashboard-header h1 {
+  font-size: 28px;
+  color: #ff6b6b; /* Merah ceria */
+}
+
+.dashboard-header p {
+  font-size: 16px;
+  color: #333;
+  margin-top: 8px;
+}
+
+.dashboard-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 24px;
+  margin-bottom: 40px;
+}
+
+.stat-card {
+  background-color: rgba(255, 255, 255, 0.85); /* Putih transparan */
+  padding: 20px;
+  border-radius: 16px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: scale(1.03);
+}
+
+.stat-card h3 {
+  margin: 0;
+  font-size: 22px;
+  color: #4caf50; /* Hijau segar */
+}
+
+.stat-card p {
+  margin-top: 8px;
+  font-size: 16px;
+  color: #666; /* Tetap abu-abu netral */
+}
+
+.quick-actions {
+  text-align: center;
+}
+
+.quick-actions button {
+  background-color: #ff6b6b; /* Merah ceria */
+  color: #ffffff;
+  border: none;
+  padding: 10px 20px;
+  font-weight: bold;
+  border-radius: 12px;
+  margin: 0 8px;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.quick-actions button:hover {
+  transform: translateY(-2px);
+  background-color: #e55b5b; /* Merah lebih gelap saat hover */
+}

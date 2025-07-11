@@ -1,0 +1,32 @@
+.books-container {
+  min-height: 100vh;
+  padding: 32px;
+  background-image: url("/images/homeback.jpg"); /* pastikan file ada di /public/images */
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  position: relative;
+  font-family: 'Comic Sans MS', cursive, sans-serif; /* Sama dengan playlist */
+}
+
+/* Overlay transparan lembut */
+.books-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: rgba(255, 255, 255, 0.8); /* disamakan dengan playlist */
+  z-index: 0;
+}
+
+.books-container > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Judul konsisten */
+.books-title {
+  text-align: center;
+  font-size: 32px;
+  color: #ff6b6b;
+  margin-bottom: 24px;
+}
